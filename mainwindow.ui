@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>697</width>
+    <height>589</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>OmerNote</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <widget class="QTextEdit" name="textEdit">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>0</y>
+      <width>681</width>
+      <height>311</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>681</width>
+      <height>0</height>
+     </size>
+    </property>
+   </widget>
+   <widget class="QTextBrowser" name="textBrowser">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>330</y>
+      <width>681</width>
+      <height>131</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>697</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuDosya">
+    <property name="title">
+     <string>Dosya</string>
+    </property>
+    <addaction name="actionNew"/>
+    <addaction name="actionA"/>
+    <addaction name="separator"/>
+    <addaction name="actionKaydet"/>
+    <addaction name="actionFarkl_Kaydet"/>
+    <addaction name="actionYazd_r"/>
+   </widget>
+   <widget class="QMenu" name="menuD_zenle">
+    <property name="title">
+     <string>Düzenle</string>
+    </property>
+    <addaction name="actionYap_t_r"/>
+    <addaction name="actionKopyala"/>
+    <addaction name="actionKes"/>
+    <addaction name="separator"/>
+    <addaction name="actionGeri_Al"/>
+    <addaction name="action_leri_Al"/>
+   </widget>
+   <widget class="QMenu" name="menuDerleme_lemleri">
+    <property name="title">
+     <string>Derleme İşlemleri</string>
+    </property>
+    <addaction name="actionLexical_Analiz_Yap"/>
+    <addaction name="action_kt_Penceresini_Temizle"/>
+   </widget>
+   <widget class="QMenu" name="menuHakk_nda">
+    <property name="title">
+     <string>Hakkında</string>
+    </property>
+    <addaction name="actionGeli_tirici"/>
+   </widget>
+   <addaction name="menuDosya"/>
+   <addaction name="menuD_zenle"/>
+   <addaction name="menuDerleme_lemleri"/>
+   <addaction name="menuHakk_nda"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionNew"/>
+   <addaction name="actionA"/>
+   <addaction name="actionKaydet"/>
+   <addaction name="actionGeri_Al"/>
+   <addaction name="action_leri_Al"/>
+   <addaction name="actionYazd_r"/>
+   <addaction name="actionLexical_Analiz_Yap"/>
+   <addaction name="separator"/>
+   <addaction name="actionGeli_tirici"/>
+  </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>BottomToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="action_kt_Penceresini_Temizle"/>
+  </widget>
+  <action name="actionNew">
+   <property name="icon">
+    <iconset resource="Res.qrc">
+     <normaloff>:/Icons/png/glyphicons_149_folder_new.png</normaloff>:/Icons/png/glyphicons_149_folder_new.png</iconset>
+   </property>
+   <property name="text">
+    <string>Yeni</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionA">
+   <property name="icon">
+    <iconset resource="Res.qrc">
+     <normaloff>:/Icons/png/glyphicons_144_folder_open.png</normaloff>:/Icons/png/glyphicons_144_folder_open.png</iconset>
+   </property>
+   <property name="text">
+    <string>Aç</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionKaydet">
+   <property name="icon">
+    <iconset resource="Res.qrc">
+     <normaloff>:/Icons/png/glyphicons_342_hdd.png</normaloff>:/Icons/png/glyphicons_342_hdd.png</iconset>
+   </property>
+   <property name="text">
+    <string>Kaydet</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionFarkl_Kaydet">
+   <property name="icon">
+    <iconset resource="Res.qrc">
+     <normaloff>:/Icons/png/glyphicons_330_blog.png</normaloff>:/Icons/png/glyphicons_330_blog.png</iconset>
+   </property>
+   <property name="text">
+    <string>Farklı Kaydet</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionYap_t_r">
+   <property name="icon">
+    <iconset resource="Res.qrc">
+     <normaloff>:/Icons/png/glyphicons_358_file_import.png</normaloff>:/Icons/png/glyphicons_358_file_import.png</iconset>
+   </property>
+   <property name="text">
+    <string>Yapıştır</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="actionKopyala">
+   <property name="icon">
+    <iconset resource="Res.qrc">
+     <normaloff>:/Icons/png/glyphicons_318_more_items.png</normaloff>:/Icons/png/glyphicons_318_more_items.png</iconset>
+   </property>
+   <property name="text">
+    <string>Kopyala</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionKes">
+   <property name="icon">
+    <iconset resource="Res.qrc">
+     <normaloff>:/Icons/png/glyphicons_205_electricity.png</normaloff>:/Icons/png/glyphicons_205_electricity.png</iconset>
+   </property>
+   <property name="text">
+    <string>Kes</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="actionGeri_Al">
+   <property name="icon">
+    <iconset resource="Res.qrc">
+     <normaloff>:/Icons/png/glyphicons_221_unshare.png</normaloff>:/Icons/png/glyphicons_221_unshare.png</iconset>
+   </property>
+   <property name="text">
+    <string>Geri Al</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="action_leri_Al">
+   <property name="icon">
+    <iconset resource="Res.qrc">
+     <normaloff>:/Icons/png/glyphicons_222_share.png</normaloff>:/Icons/png/glyphicons_222_share.png</iconset>
+   </property>
+   <property name="text">
+    <string>İleri Al</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Y</string>
+   </property>
+  </action>
+  <action name="actionLexical_Analiz_Yap">
+   <property name="icon">
+    <iconset resource="Res.qrc">
+     <normaloff>:/Icons/png/glyphicons_136_cogwheel.png</normaloff>:/Icons/png/glyphicons_136_cogwheel.png</iconset>
+   </property>
+   <property name="text">
+    <string>Lexical Analiz Yap</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F5</string>
+   </property>
+  </action>
+  <action name="actionGeli_tirici">
+   <property name="icon">
+    <iconset resource="Res.qrc">
+     <normaloff>:/Icons/png/glyphicons_034_old_man.png</normaloff>:/Icons/png/glyphicons_034_old_man.png</iconset>
+   </property>
+   <property name="text">
+    <string>Geliştirici</string>
+   </property>
+  </action>
+  <action name="actionYazd_r">
+   <property name="icon">
+    <iconset resource="Res.qrc">
+     <normaloff>:/Icons/png/glyphicons_015_print.png</normaloff>:/Icons/png/glyphicons_015_print.png</iconset>
+   </property>
+   <property name="text">
+    <string>Yazdır</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="action_kt_Penceresini_Temizle">
+   <property name="icon">
+    <iconset resource="Res.qrc">
+     <normaloff>:/Icons/png/glyphicons_256_delete.png</normaloff>:/Icons/png/glyphicons_256_delete.png</iconset>
+   </property>
+   <property name="text">
+    <string>Çıktı Penceresini Temizle</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="Res.qrc"/>
+ </resources>
+ <connections/>
+</ui>
