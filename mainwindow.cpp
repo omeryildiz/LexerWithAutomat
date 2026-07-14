@@ -1,18 +1,35 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QCloseEvent>
+#include <QFile>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QMessageBox>
+#include <QPrintDialog>
+#include <QPrinter>
+#include <QSaveFile>
+#include <QStringList>
+#include <QStatusBar>
+#include <QTextDocument>
+#include <QTextStream>
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    //this->setCentralWidget(ui->textBrowser);
-    //this->setCentralWidget(ui->textEdit);
-    this->setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
 
+    ui->textEdit->setAcceptRichText(false);
+    ui->textBrowser->setOpenExternalLinks(false);
 
+    connect(ui->textEdit->document(), &QTextDocument::modificationChanged, this, [this](bool) {
+        updateWindowTitle();
+    });
 
+    resetDocument();
+    resize(960, 720);
+    statusBar()->showMessage(tr("Ready"), 3000);
 }
 
 MainWindow::~MainWindow()
@@ -20,372 +37,91 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if (maybeSaveChanges()) {
+        event->accept();
+        return;
+    }
+
+    event->ignore();
+}
+
 void MainWindow::on_actionNew_triggered()
 {
+    if (!maybeSaveChanges()) {
+        return;
+    }
 
-    mFileName = "";
-    ui->textEdit->setPlainText("");
-
+    resetDocument();
+    statusBar()->showMessage(tr("New document created."), 3000);
 }
 
 void MainWindow::on_actionA_triggered()
 {
-    QString file = QFileDialog::getOpenFileName(this,trUtf8("Dosya Seç..."));
-
-    if(!file.isEmpty())
-    {
-        QFile sFile(file);
-
-        if(sFile.open(QFile::ReadOnly | QFile::Text))
-        {
-
-            QTextStream in(&sFile);
-            QString text = in.readAll();
-            sFile.close();
-            ui->textEdit->setPlainText(text);
-        }
-
-
+    if (!maybeSaveChanges()) {
+        return;
     }
 
+    const QString filePath = QFileDialog::getOpenFileName(
+        this,
+        tr("Open source file"),
+        QString(),
+        tr("Source files (*.txt *.c *.cc *.cpp *.h *.hpp);;All files (*)"));
+
+    if (!filePath.isEmpty()) {
+        loadFile(filePath);
+    }
 }
 
 void MainWindow::on_actionKaydet_triggered()
 {
-
-    if(mFileName.isEmpty()){
-        on_actionFarkl_Kaydet_triggered();
-
-
-    }
-
-    QFile sFile(mFileName);
-
-        if(sFile.open(QFile::WriteOnly | QFile::Text))
-        {
-            QTextStream out(&sFile);
-            out << ui->textEdit->toPlainText();
-            sFile.flush();
-            sFile.close();
-
-
-        }
-
-
-
-
-
-
+    save();
 }
 
 void MainWindow::on_actionFarkl_Kaydet_triggered()
 {
-    QString file = QFileDialog::getSaveFileName(this,trUtf8("Dosya Seç||İsim Belirle"));
-
-    if(!file.isEmpty())
-    {
-        mFileName = file;
-        on_actionKaydet_triggered();
-
-
-    }
-
-
+    saveAs();
 }
 
 void MainWindow::on_actionYap_t_r_triggered()
 {
     ui->textEdit->paste();
-
 }
 
 void MainWindow::on_actionKopyala_triggered()
 {
     ui->textEdit->copy();
-
 }
 
 void MainWindow::on_actionGeri_Al_triggered()
 {
     ui->textEdit->undo();
-
 }
 
 void MainWindow::on_action_leri_Al_triggered()
 {
     ui->textEdit->redo();
-
 }
-int MainWindow::scan(QChar grText)
-{
-    if(grText.isDigit())
-        return 6;
-
-
-    char tempChar = grText.toAscii();
-    printf("Gönderilen karakter %c\n",tempChar);
-
-
-            switch (tempChar) {
-        case '(':
-            return 0;
-            break;
-        case ')':
-            return 1;
-            break;
-        case '{':
-            return 2;
-            break;
-        case '}':
-            return 3;
-            break;
-        case '+':
-            return 4;
-            break;
-        case '-':
-            return 5;
-            break;
-        case 'i':
-            return 7;
-            break;
-        case 'f':
-            return 8;
-            break;
-        case 'w':
-            return 10;
-            break;
-        case 'h':
-            return 11;
-            break;
-
-            case 'l':
-                return 12;
-                break;
-            case 'e':
-                return 13;
-                break;
-
-            case 's':
-                return 14;
-                break;
-            case '.':
-                return 15;
-                break;
-            case '=':
-                return 16;
-                break;
-            case ';':
-                return 17;
-                break;
-            case '<':
-                return 18;
-                break;
-            case '>':
-                return 19;
-                break;
-            case 'n':
-                return 20;
-                break;
-            case 't':
-                return 21;
-                break;
-            case ' ': case '\n': case '\t':
-                return 22;
-                break;
-
-        default:
-            break;
-    }
-            if(grText.isLetter())
-                return 9;
-
-}
-
 
 void MainWindow::on_actionLexical_Analiz_Yap_triggered()
 {
-    struct token_t token;
-
-    //todo: ktransition tablosunu dışardan al!
-    //Elle yazmak mantıklı değil
-                                //1 2 3 4   5  6    7   8   9   10 11  12  13  14  15  16  17 18 19 20 21 22 23
-                                //(	) {	}	+	-	dg	i	f	lt	w	h	l	e	s	.  =   ;  <  >  n  t bos
-int kTransitionTable[23][23] = { {0,0,0,0,	0,	0,	14,	0,	0,	0,	0,	0,	0,	0,	0,	0, 21, 0 ,0 ,0 ,0 ,0,9},//0
-                                 {1,1,1,1,	1,	1,	1,	1,	1,	1,	1,	2,	1,	1,	1,	1, 1 , 1 ,1 ,1 ,1 ,1,9},//1
-                                 {2,2,2,2,	2,	2,	2,	4,	2,	2,	2,	2,	2,	2,	2,	2, 2 ,2 ,2 ,2 ,2 ,2,9},//2
-                                 {3,3,3,3,	3,	3,	3,	3,	3,	3,	3,	3,	5,	3,	3,	3, 3 ,3 ,3 ,3 ,3 ,3,9},//3
-                                 {4,4,4,4,	4,	4,	4,	4,	4,	4,	4,	4,	6,	4,	4,	4, 4 ,4 ,4 ,4 ,4 ,4,9},//4
-                                 {5,5,5,5,	5,	5,	5,	5,	5,	5,	5,	5,	5,	5,	7,	5, 5 ,5 ,5 ,5 ,5 ,5,9},//5
-                                 {6,6,6,6,	6,	6,	6,	6,	6,	6,	6,	6,	6,	12,	6,	6, 6 ,6 ,6 ,6 ,6 ,6,9},//6
-                                 {7,7,7,7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	13,	7,	7, 7 ,7 ,7 ,7 ,7 ,7,9},//7
-                                 {8,8,8,8,	8,	8,	8,	8,	15,	8,	8,	8,	8,	8,	8,	8, 8 ,8 ,8 ,8 ,19,8,9},//8
-                              {10,10,10,10, 0,  0,	14,	8,	9,	13,	1,	9,	9,	1,	9,  9, 16,17,18,18,13,13,9},//9
-                                 {9,9,9,9,	 9,	9,	9,	9,	9,	9,	9,	9,	9,	9,	9,  9, 10,10,10,10,10,10,9},//10
-                                {11,11,11,11,11,11,	11,	11,	11,	11,	11,	11,	11,	11,	11,11, 11,11,11,11,11,11,9},//11
-                                {12,12,12,12,12,12,	12,	12,	12,	13,	12,	12,	12,	12,	12,12, 12,12,12,12,12,12,9},//12
-                                 {9,9,9,	9,	9,	9,	9,	9,	13,	9,	9,	13,	9,	9,	9 ,9 ,13,13,13,13,13,13,9},//13
-                                 {14,14,14,	14,	14,	14,	14,	14,	14,	14,	14,	14,	14,	14,	14,11,14,14,14,14,14,14,9},//14
-                                 {15,15,15, 15, 15, 15, 13, 15, 15, 13, 15, 15, 15, 15, 15,15,15,15,15,15,15,15,9},//15
-                                 {16,16,16,	16,	16,	16,	16,	16,	16,	16,	16,	16,	16,	16,	16,22,16,16,16,16,16,16,9},//16
-                                 {17,17,17,	17,	17,	17,	17,	17,	17,	17,	17,	17,	17,	17,	17,17,17,17,17,17,17,17,9},//17
-                                 {18,18,18,	18,	18,	18,	18,	18,	18,	18,	18,	18,	18,	18,	18,18,18,18,18,18,18,18,9},//18
-                                 {19,19,19,	19,	19,	19,	19,	19,	19,	19,	19,	19,	19,	19,	19,19,19,19,19,19,19,20,9},//19
-                                 {20,20,20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,20,20,20,20,20,20,20,9},//20
-                                 {21,21,21,	21,	21,	21,	21,	21,	21,	21,	21,	21,	21,	21,	21,21,21,21,21,21,21,21,9},//21
-                                 {22,22,22,	22,	22,	22,	22, 22,22 ,	22,	22,	22,	22,	22,	22,22,22,22,22,22,22,22,9} //22
-                                //1  2  3    4  5    6   7   8  9   10  11  12  13  14  15 16 17 18 19 20 21 22
-
-                               };
-                           //     0      1    2    3   4     5    6       7    8    9             10           11                12          13             14        15             16                17                18            19      20                21              22
-QString kAcceptTable[23] = {"TOKEN_+-","ID","ID","ID","ID","ID","ID",	"ID","ID","ID","TOKEN_BRACE_PAREN","TOKEN_FLOAT","TOKEN_WHILE","TOKEN_IDENTIFIER","DIGIT","TOKEN_IF","TOKEN_ASSIGN_MARK","TOKEN_COMMA","TOKEN_LESS_OR_BIGGER","ID","TOKEN_INT","TOKEN_MINUS_OR_PLUS","EMPTY_STRING"};
-
-    QString str = ui->textEdit->toPlainText();
-    QByteArray ba = str.toLatin1();
-    char *symbol = ba.data();//Tüm metin dinamik char değişkene dönüştürülüyor.
-    //QChar *inputText = ui->textEdit->toPlainText().data();
-    printf("symbol = %s\n",symbol);
-    QChar tempText;
-    int state = 9;//başlangıç durumu ayarlamaları
-    ui->textBrowser->setText("");//textbrowser ayarı
-    int j = 0;
-    token.val.cleanstring();
-
-    printf("string boyutu %d\n",str.size());
-    for (int i = 0; i < str.size(); i++) {
-
-        //printf("symbol typeu\n",symbol[i]);
-        printf("i=%d  j=%d\n",i,j);
-        tempText = symbol[i];
-        if (state == 9) {
-            j = 0;
-        }
-        token.val.stringValue[j] = symbol[i];
-        int result = scan(tempText);
-        printf("scan(tempText) type = %d\n",result);
-        printf("kTransitionTable[%d][%d]",state,result);
-        state = kTransitionTable[state][result];
-        printf("= %d\n\n",state);
-        QString type = kAcceptTable[state];
-        //QString qStr = QString::number(state);
-        QString t_value = token.val.stringValue;
-
-
-        switch (state) {
-        case D_PARANTEZ:
-            ui->textBrowser->insertHtml(t_value.append("-"));
-            ui->textBrowser->insertHtml(type.append("<br />"));
-            j=0;
-            token.val.cleanstring();
-            state=9;
-            break;
-        case D_FLOAT:
-            ui->textBrowser->insertHtml(t_value.append("-"));
-            ui->textBrowser->insertHtml(type.append("<br />"));
-            j=0;
-            token.val.cleanstring();
-            state=9;
-            i--;
-            break;
-        case D_WHILE:
-            ui->textBrowser->insertHtml(t_value.append("-"));
-            ui->textBrowser->insertHtml(type.append("<br />"));
-            j=0;
-            token.val.cleanstring();
-            state=9;
-            break;
-        case D_IF:
-            ui->textBrowser->insertHtml(t_value.append("-"));
-            ui->textBrowser->insertHtml(type.append("<br />"));
-            j = 0;
-            token.val.cleanstring();
-            state=9;
-            break;
-        case D_ASIGN:
-            ui->textBrowser->insertHtml(t_value.append("-"));
-            ui->textBrowser->insertHtml(type.append("<br />"));
-            j = 0;
-            token.val.cleanstring();
-            state=9;
-            break;
-        case D_COMMA:
-            ui->textBrowser->insertHtml(t_value.append("-"));
-            ui->textBrowser->insertHtml(type.append("<br />"));
-            j = 0;
-            token.val.cleanstring();
-            state=9;
-            break;
-        case D_ASSIGN_MP:
-            ui->textBrowser->insertHtml(t_value.append("-"));
-            ui->textBrowser->insertHtml(type.append("<br />"));
-            j = 0;
-            token.val.cleanstring();
-            state=9;
-            break;
-        case D_LESS_BIG:
-            ui->textBrowser->insertHtml(t_value.append("-"));
-            ui->textBrowser->insertHtml(type.append("<br />"));
-            j = 0;
-            token.val.cleanstring();
-            state=9;
-            break;
-        case D_INT:
-            ui->textBrowser->insertHtml(t_value.append("-"));
-            ui->textBrowser->insertHtml(type.append("<br />"));
-            j = 0;
-            token.val.cleanstring();
-            state=9;
-            break;
-        case D_COMPARE:
-            ui->textBrowser->insertHtml(t_value.append("-"));
-            ui->textBrowser->insertHtml(type.append("<br />"));
-            j = 0;
-            token.val.cleanstring();
-            state=9;
-            break;
-        case D_PLUS_MINUS:
-            ui->textBrowser->insertHtml(t_value.append("-"));
-            ui->textBrowser->insertHtml(type.append("<br />"));
-            j = 0;
-            token.val.cleanstring();
-            state=9;
-            break;
-
-
-        case 13:
-            ui->textBrowser->insertHtml(t_value.append("-"));
-            ui->textBrowser->insertHtml(type.append("<br />"));
-            j = 0;
-            token.val.cleanstring();
-            state=9;
-            break;
-        default:
-            j++;
-
-
-            break;
-        }
-
-
-
-
-    }
-
-
-    //ui->textBrowser->setText(type.append("<br />"));
-    //QMessageBox::about(this,"",type);
+    const Lexer::Result result = mLexer.tokenize(ui->textEdit->toPlainText());
+    showAnalysis(result);
+    statusBar()->showMessage(
+        tr("Analysis completed: %1 tokens, %2 errors.")
+            .arg(result.tokens.size())
+            .arg(result.errors.size()),
+        5000);
 }
-
-
-
-
-
 
 void MainWindow::on_actionGeli_tirici_triggered()
 {
-    QMessageBox::about(this, trUtf8("Geliştirici Hakkında"),
-              trUtf8("Bu editör Ömer Yıldız tarafından eğlence için yazılmıştır." \
-                     "http://www.omeryildiz.org.\n"
-                     "Mail: nomeryildiz@gmail.com"));
+    QMessageBox::about(
+        this,
+        tr("About"),
+        tr("LexerWithAutomat is an educational lexer workbench for tokenizing a small language.\n"
+           "Original concept by Omer Yildiz, modernized for current Qt toolchains."));
 }
 
 void MainWindow::on_actionKes_triggered()
@@ -396,19 +132,172 @@ void MainWindow::on_actionKes_triggered()
 void MainWindow::on_actionYazd_r_triggered()
 {
     QPrinter printer(QPrinter::HighResolution);
-       QPrintDialog *dlg = new QPrintDialog(&printer, this);
-       if (ui->textEdit->textCursor().hasSelection())
-           dlg->addEnabledOption(QAbstractPrintDialog::PrintSelection);
-       dlg->setWindowTitle(trUtf8("Dökümanı Yazdır"));
-       if (dlg->exec() == QDialog::Accepted) {
-           ui->textEdit->print(&printer);
-       }
-       delete dlg;
+    QPrintDialog dialog(&printer, this);
+    dialog.setWindowTitle(tr("Print document"));
 
+    if (ui->textEdit->textCursor().hasSelection()) {
+        dialog.addEnabledOption(QAbstractPrintDialog::PrintSelection);
+    }
+
+    if (dialog.exec() == QDialog::Accepted) {
+        ui->textEdit->print(&printer);
+    }
 }
 
 void MainWindow::on_action_kt_Penceresini_Temizle_triggered()
 {
     ui->textBrowser->clear();
+    statusBar()->showMessage(tr("Analysis output cleared."), 3000);
+}
 
+bool MainWindow::maybeSaveChanges()
+{
+    if (!ui->textEdit->document()->isModified()) {
+        return true;
+    }
+
+    const QMessageBox::StandardButton choice = QMessageBox::warning(
+        this,
+        tr("Unsaved changes"),
+        tr("The current document has unsaved changes. Do you want to save them?"),
+        QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+
+    switch (choice) {
+    case QMessageBox::Save:
+        return save();
+    case QMessageBox::Discard:
+        return true;
+    case QMessageBox::Cancel:
+    default:
+        return false;
+    }
+}
+
+bool MainWindow::save()
+{
+    if (mFileName.isEmpty()) {
+        return saveAs();
+    }
+
+    return saveFile(mFileName);
+}
+
+bool MainWindow::saveAs()
+{
+    const QString filePath = QFileDialog::getSaveFileName(
+        this,
+        tr("Save document as"),
+        mFileName.isEmpty() ? QStringLiteral("source.txt") : mFileName,
+        tr("Source files (*.txt *.c *.cc *.cpp *.h *.hpp);;All files (*)"));
+
+    if (filePath.isEmpty()) {
+        return false;
+    }
+
+    return saveFile(filePath);
+}
+
+bool MainWindow::loadFile(const QString &filePath)
+{
+    QFile file(filePath);
+    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+        QMessageBox::critical(
+            this,
+            tr("Open failed"),
+            tr("The file could not be opened:\n%1").arg(file.errorString()));
+        return false;
+    }
+
+    QTextStream input(&file);
+    ui->textEdit->setPlainText(input.readAll());
+    ui->textEdit->document()->setModified(false);
+    ui->textBrowser->clear();
+    mFileName = filePath;
+    updateWindowTitle();
+    statusBar()->showMessage(tr("Loaded %1").arg(QFileInfo(filePath).fileName()), 3000);
+    return true;
+}
+
+bool MainWindow::saveFile(const QString &filePath)
+{
+    QSaveFile file(filePath);
+    if (!file.open(QFile::WriteOnly | QFile::Text)) {
+        QMessageBox::critical(
+            this,
+            tr("Save failed"),
+            tr("The file could not be written:\n%1").arg(file.errorString()));
+        return false;
+    }
+
+    QTextStream output(&file);
+    output << ui->textEdit->toPlainText();
+
+    if (!file.commit()) {
+        QMessageBox::critical(
+            this,
+            tr("Save failed"),
+            tr("The file could not be finalized:\n%1").arg(file.errorString()));
+        return false;
+    }
+
+    mFileName = filePath;
+    ui->textEdit->document()->setModified(false);
+    updateWindowTitle();
+    statusBar()->showMessage(tr("Saved %1").arg(QFileInfo(filePath).fileName()), 3000);
+    return true;
+}
+
+void MainWindow::resetDocument()
+{
+    mFileName.clear();
+    ui->textEdit->clear();
+    ui->textBrowser->clear();
+    ui->textEdit->document()->setModified(false);
+    updateWindowTitle();
+}
+
+void MainWindow::updateWindowTitle()
+{
+    const QString fileLabel = mFileName.isEmpty()
+        ? tr("Untitled")
+        : QFileInfo(mFileName).fileName();
+    const QString modifiedSuffix = ui->textEdit->document()->isModified()
+        ? QStringLiteral("*")
+        : QString();
+
+    setWindowTitle(tr("%1%2 - LexerWithAutomat").arg(fileLabel, modifiedSuffix));
+}
+
+void MainWindow::showAnalysis(const Lexer::Result &result)
+{
+    QStringList lines;
+    lines.reserve(result.tokens.size() + result.errors.size() + 4);
+    lines << tr("Tokens: %1").arg(result.tokens.size());
+
+    if (result.tokens.isEmpty()) {
+        lines << tr("No tokens found.");
+    } else {
+        for (const Lexer::Token &token : result.tokens) {
+            lines << tr("[%1:%2] %3 -> %4")
+                         .arg(token.line)
+                         .arg(token.column)
+                         .arg(Lexer::tokenTypeToString(token.type), token.lexeme);
+        }
+    }
+
+    lines << QString();
+    lines << tr("Errors: %1").arg(result.errors.size());
+
+    if (result.errors.isEmpty()) {
+        lines << tr("No lexical errors.");
+    } else {
+        for (const Lexer::Error &error : result.errors) {
+            lines << tr("[%1:%2] %3")
+                         .arg(error.line)
+                         .arg(error.column)
+                         .arg(error.message);
+        }
+    }
+
+    ui->textBrowser->setPlainText(lines.join(QChar('\n')));
 }

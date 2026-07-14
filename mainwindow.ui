@@ -6,54 +6,44 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>697</width>
-    <height>589</height>
+    <width>960</width>
+    <height>720</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>OmerNote</string>
+   <string>LexerWithAutomat</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QTextEdit" name="textEdit">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>0</y>
-      <width>681</width>
-      <height>311</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="minimumSize">
-     <size>
-      <width>681</width>
-      <height>0</height>
-     </size>
-    </property>
-   </widget>
-   <widget class="QTextBrowser" name="textBrowser">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>330</y>
-      <width>681</width>
-      <height>131</height>
-     </rect>
-    </property>
-   </widget>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QSplitter" name="mainSplitter">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <widget class="QTextEdit" name="textEdit">
+       <property name="acceptRichText">
+        <bool>false</bool>
+       </property>
+       <property name="placeholderText">
+        <string>Analiz edilecek kaynak kodu buraya girin veya bir dosya açın.</string>
+       </property>
+      </widget>
+      <widget class="QTextBrowser" name="textBrowser">
+       <property name="placeholderText">
+        <string>Lexical analiz çıktısı burada gösterilir.</string>
+       </property>
+      </widget>
+     </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>697</width>
-     <height>25</height>
+     <width>960</width>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuDosya">
@@ -80,7 +70,7 @@
    </widget>
    <widget class="QMenu" name="menuDerleme_lemleri">
     <property name="title">
-     <string>Derleme İşlemleri</string>
+     <string>Analiz</string>
     </property>
     <addaction name="actionLexical_Analiz_Yap"/>
     <addaction name="action_kt_Penceresini_Temizle"/>
@@ -116,7 +106,7 @@
   </widget>
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
-    <string>toolBar</string>
+    <string>Output</string>
    </property>
    <attribute name="toolBarArea">
     <enum>BottomToolBarArea</enum>
@@ -240,7 +230,7 @@
      <normaloff>:/Icons/png/glyphicons_136_cogwheel.png</normaloff>:/Icons/png/glyphicons_136_cogwheel.png</iconset>
    </property>
    <property name="text">
-    <string>Lexical Analiz Yap</string>
+    <string>Lexical Analizi Çalıştır</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+F5</string>
@@ -273,7 +263,7 @@
      <normaloff>:/Icons/png/glyphicons_256_delete.png</normaloff>:/Icons/png/glyphicons_256_delete.png</iconset>
    </property>
    <property name="text">
-    <string>Çıktı Penceresini Temizle</string>
+    <string>Çıktıyı Temizle</string>
    </property>
   </action>
  </widget>

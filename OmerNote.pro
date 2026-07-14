@@ -1,24 +1,22 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2013-05-19T02:09:51
-#
-#-------------------------------------------------
+QT += core gui widgets printsupport
 
-QT       += core gui
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-
-TARGET = OmerNote
 TEMPLATE = app
+TARGET = LexerWithAutomat
 
-CONFIG += console
+CONFIG += c++17
+CONFIG -= console
 
-SOURCES += main.cpp\
-        mainwindow.cpp
+SOURCES += \
+    lexer.cpp \
+    main.cpp \
+    mainwindow.cpp
 
-HEADERS  += mainwindow.h
+HEADERS += \
+    lexer.h \
+    mainwindow.h
 
-FORMS    += mainwindow.ui
+FORMS += \
+    mainwindow.ui
 
 RESOURCES += \
     Res.qrc
