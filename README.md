@@ -50,18 +50,40 @@ Bu depo, 2012 tarihli öğrenci projesinin modern Qt 5 / Qt 6 araç zincirleri i
   - Qt 6 için: `qt6-base-dev`
 - Yazdırma özelliği için Qt Print Support
 
+### Ubuntu / Debian Paketleri
+
+Qt 5 ile bu projeyi derlemek için aşağıdaki paketler yeterlidir:
+
+```bash
+sudo apt update
+sudo apt install -y \
+  build-essential \
+  cmake \
+  qtbase5-dev \
+  qtbase5-dev-tools \
+  qt5-qmake \
+  qtchooser \
+  libglu1-mesa-dev \
+  libgl-dev \
+  libegl-dev \
+  libvulkan-dev \
+  libxext-dev
+```
+
 ### CMake ile
 
 ```bash
+rm -rf build
 cmake -S . -B build
-cmake --build build
+cmake --build build -j"$(nproc)"
 ```
 
 ### qmake ile
 
 ```bash
+rm -f Makefile
 qmake OmerNote.pro
-make
+make -j"$(nproc)"
 ```
 
 ## Kullanım
@@ -79,6 +101,32 @@ while (counter > 0) {
     counter -= 1;
 }
 ```
+
+## Lexer Kapsamı ve Sınırlar
+
+Bu lexer, bilinçli olarak küçük bir token kümesini tanır. Aşağıdaki karakterler veya yapılar şu anda desteklenmez:
+
+- Çift tırnak: `"`
+- Tek tırnak: `'`
+- Fonksiyon çağrısı için özel token kuralları
+- String literal yapıları
+- Karakter literal yapıları
+- Bölme, çarpma, mod gibi operatörler: `/` `*` `%`
+- Köşeli parantezler: `[` `]`
+- İki nokta, yorum ve benzeri ek sözdizimleri
+
+Örneğin aşağıdaki girişte `printf` bir `TOKEN_IDENTIFIER` olarak tanınır; ancak `"` karakteri lexer tarafından tanınmaz ve hata olarak raporlanır:
+
+```txt
+printf("test")
+```
+
+Bu örnekte beklenen davranış:
+
+- `printf` tanınır
+- `(` ve `)` tanınır
+- `"` karakterleri tanınmaz
+- `test` içeride harflerden oluştuğu için tanımlayıcı gibi ayrışır, fakat string literal olarak ele alınmaz
 
 ## Modernizasyon Notları
 
